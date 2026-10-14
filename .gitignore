@@ -1,0 +1,30 @@
+# Files that are not needed to run the CMIP6 Atlantis forcing workflow.
+# They stay on disk; they are not part of this repository.
+
+# Previous CMIP5 workflow
+projections_code/
+
+# CMIP6 download helpers and credentials settings
+config.sh
+download_all.sh
+esgf_inventory.py
+make_wget_scripts.sh
+test_download.sh
+wgetrc
+wget_scripts/
+logs/
+
+# Input data and generated outputs
+*.nc
+cmip6_data/
+atlantis_model/
+outputs/
+cmip6_atlantis_outputs/
+
+# Python and batch leftovers
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+*.out
+.DS_Store
