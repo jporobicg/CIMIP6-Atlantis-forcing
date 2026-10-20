@@ -68,13 +68,18 @@ def read_baseline(variable_key, layers):
         raise ValueError(f"{baseline_file.name}: shape {baseline['values'].shape} does not match the "
                          f"init file ({len(layers['numlayers'])} boxes, {layers['n_water_layers']} + 1 layers)")
 
-    # Layers that exist must have data; layers that do not exist hold 0 (checked, not assumed)
+    # Layers that exist must have data; layers that do not exist hold 0 (checked, not assumed).
+    # An exact 0 in a temperature layer can be a real sample, because the file uses
+    # 0 as _FillValue. Those samples are nudged later so Atlantis does not drop them.
     exists = layer_exists_mask(layers)
     unused_values = baseline["values"][:, ~exists]
     if np.any(unused_values != 0):
         raise ValueError(f"{baseline_file.name}: non-zero values in layers that do not exist")
-    if np.any(baseline["values"][:, exists] == 0) or np.isnan(baseline["values"]).any():
-        raise ValueError(f"{baseline_file.name}: zeros or NaN in existing layers")
+    existing_values = baseline["values"][:, exists]
+    if np.isnan(existing_values).any():
+        raise ValueError(f"{baseline_file.name}: NaN in existing layers")
+    if baseline["fill_value"] != 0 and np.any(existing_values == 0):
+        raise ValueError(f"{baseline_file.name}: zeros in existing layers")
     sediment = layers["sediment_index"]
     if not np.array_equal(baseline["values"][:, :, sediment], baseline["values"][:, :, 0]):
         raise ValueError(f"{baseline_file.name}: sediment layer is not a copy of layer 0")
